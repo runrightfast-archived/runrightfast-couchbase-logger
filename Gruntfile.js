@@ -27,8 +27,8 @@ module.exports = function(grunt) {
 					white : true,
 					vars : true,
 					nomen : true,
-					plusplus: true,
-					predef : [ 'describe', 'it' ]
+					plusplus : true,
+					predef : [ 'describe', 'it', 'before', 'after' ]
 				},
 				options : {
 					log : 'out/lint.log',
@@ -42,7 +42,7 @@ module.exports = function(grunt) {
 			coverage : {
 				options : {
 					reporter : 'html-cov',
-					output : "out/coverage.html"					
+					output : "out/coverage.html"
 				}
 			},
 			test : {
