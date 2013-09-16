@@ -19,7 +19,7 @@ var uuid = require('uuid');
 var Couchbase = require('couchbase');
 
 var couchbaseConfig = {
-	"hosts" : [ "localhost:8091" ],
+	"host" : [ "localhost:8091" ],
 	"bucket" : "default"
 };
 
