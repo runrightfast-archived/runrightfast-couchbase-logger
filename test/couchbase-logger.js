@@ -60,8 +60,7 @@ describe('CouchbaseLogger', function() {
 			done(errorEvent.error);
 		};
 
-		couchbaseLogger = couchbaseLogger.on(COUCHBASE_LOGGER_EVENT.LOGGED_EVENT, loggedEventListener).on(COUCHBASE_LOGGER_EVENT.LOG_EVENT_ERR,
-				logErrorEventListener);
+		couchbaseLogger.once(COUCHBASE_LOGGER_EVENT.LOGGED_EVENT, loggedEventListener).once(COUCHBASE_LOGGER_EVENT.LOG_EVENT_ERR, logErrorEventListener);
 		var listeners = couchbaseLogger.listeners(COUCHBASE_LOGGER_EVENT.LOGGED_EVENT);
 		expect(listeners.length).to.equal(1);
 
@@ -73,6 +72,31 @@ describe('CouchbaseLogger', function() {
 		};
 		couchbaseLogger.logEvent(event);
 
+	});
+
+	it('#logListener', function(done) {
+		var loggedEventListener = function(result) {
+			console.log('loggedEventListener: ' + JSON.stringify(result));
+			done();
+		};
+
+		var logErrorEventListener = function(errorEvent) {
+			console.log('logErrorEventListener: ' + JSON.stringify(errorEvent));
+			done(errorEvent.error);
+		};
+
+		couchbaseLogger.once(COUCHBASE_LOGGER_EVENT.LOGGED_EVENT, loggedEventListener).once(COUCHBASE_LOGGER_EVENT.LOG_EVENT_ERR, logErrorEventListener);
+		var listeners = couchbaseLogger.listeners(COUCHBASE_LOGGER_EVENT.LOGGED_EVENT);
+		expect(listeners.length).to.equal(1);
+
+		var event = {
+			tags : [ 'info' ],
+			data : 'test message from CouchbaseLogger.logEvent',
+			ts : new Date(),
+			uuid : uuid.v4()
+		};
+		var logListener = couchbaseLogger.logListener();
+		logListener(event);
 	});
 
 });
