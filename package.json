@@ -1,10 +1,10 @@
 {
-	"name":"runrightfast-logging-service",
-	"version":"0.0.5",
-	"description":"RunRightFast Logging Service",
+	"name":"runrightfast-couchbase-logger",
+	"version":"0.0.1",
+	"description":"RunRightFast Couchbase Logger",
 	"repository":{
 		"type":"git",
-		"url":"https://github.com/runrightfast/runrightfast-logging-service.git"
+		"url":"https://github.com/runrightfast/runrightfast-couchbase-logger.git"
 	},
 	"main":"index",
 	"scripts":{
@@ -32,6 +32,7 @@
 		"sinon":"~1.7.3",
 		"sinon-chai":"~2.4.0",
 		"grunt-mocha-cov":"~0.0.7",
-		"grunt-contrib-clean":"~0.5.0"
+		"grunt-contrib-clean":"~0.5.0",
+		"runrightfast-logging-service":"git://github.com/runrightfast/runrightfast-logging-service.git#0.0.6"
 	}
 }
