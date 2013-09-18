@@ -28,8 +28,9 @@ describe('CouchbaseLogger', function() {
 				"host" : [ "localhost:8091" ],
 				"bucket" : "default"
 			},
-			connectionListener : function() {
+			connectionListener : function(logger) {
 				console.log('CONNECTED TO COUCHBASE');
+				expect(logger).to.exist;
 				done();
 			},
 			connectionErrorListener : function(error) {
@@ -97,6 +98,48 @@ describe('CouchbaseLogger', function() {
 		};
 		var logListener = couchbaseLogger.logListener();
 		logListener(event);
+	});
+
+	it("#start - can take an optional callback that will be called when the connection is successfully made", function(done) {
+		var options = {
+			couchbase : {
+				"host" : [ "localhost:8091" ],
+				"bucket" : "default"
+			},
+			connectionErrorListener : function(error) {
+				console.error(error);
+				done(error);
+			}
+		};
+
+		var couchbaseLogger = require('../lib/couchbase-logger').couchbaseLogger(options);
+		couchbaseLogger.start(function(logger) {
+			expect(logger).to.be.defined;
+			couchbaseLogger.stop();
+			done();
+		});
+	});
+
+	it("#start - can take an optional callback that will be called when the connection is made with an Error if the connection fails", function(done) {
+		var options = {
+			couchbase : {
+				"host" : [ "localhost:8091" ],
+				"bucket" : uuid.v4()
+			},
+			connectionErrorListener : function(error) {
+				console.error(error);
+			}
+		};
+
+		var couchbaseLogger = require('../lib/couchbase-logger').couchbaseLogger(options);
+		couchbaseLogger.start(function(error) {
+			if (error instanceof Error) {
+				done();
+			} else {
+				done(new Error('expected an Error but got : ' + error));
+			}
+
+		});
 	});
 
 });
