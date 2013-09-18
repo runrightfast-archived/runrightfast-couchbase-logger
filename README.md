@@ -21,19 +21,19 @@ The purpose of this module is to provide a logListener implementation that can b
  
 - example options:
 
-	var options = {
-		couchbase : {
-			"host" : [ "localhost:8091" ],
-			"bucket" : "default"
-		},
-		connectionListener : function(logger) {
-			console.log('CONNECTED TO COUCHBASE');			
-		},
-		connectionErrorListener : function(error,logger) {
-			console.error(error);
-			logger.stop();
-		}
-	};
+		var options = {
+			couchbase : {
+				"host" : [ "localhost:8091" ],
+				"bucket" : "default"
+			},
+			connectionListener : function(logger) {
+				console.log('CONNECTED TO COUCHBASE');			
+			},
+			connectionErrorListener : function(error,logger) {
+				console.error(error);
+				logger.stop();
+			}
+		};
 	
 - couchbaseLogger is an EventEmitter with the following events - COUCHBASE_LOGGER_EVENT defines the events that are available  
  - 'CONN_ERR' - emit(COUCHBASE_LOGGER_EVENT.CONN_ERR, error, self)
@@ -43,17 +43,17 @@ The purpose of this module is to provide a logListener implementation that can b
  - 'STARTED'
  - 'STOPPED'
  
- 	// listen for logging errors
- 	couchbaseLogger.on(COUCHBASE_LOGGER_EVENT.LOG_EVENT_ERR, function(error, event, logger) { ... }
+		 	// listen for logging errors
+		 	couchbaseLogger.on(COUCHBASE_LOGGER_EVENT.LOG_EVENT_ERR, function(error, event, logger) { ... }
 	
 - couchbaseLogger contains the following methods
  - _start(callback)_ - if not connected, will try to connect to the Couchbase database.   
-  - Connecting to the database occurs asynchronously. If a _callback_ is specified, then it will be notified when either the connection succeeds or fails.
-  - If the connection succeeds, the callback is invoked with the logger,i.e., callback(error). The _'STARTED'_ event is emitted.
-  - If the connection fails, then the callback is invoked with the error and logger, i.e., callback(error,logger).
+    Connecting to the database occurs asynchronously. If a _callback_ is specified, then it will be notified when either the connection succeeds or fails.
+    If the connection succeeds, the callback is invoked with the logger,i.e., callback(error). The _'STARTED'_ event is emitted.
+    If the connection fails, then the callback is invoked with the error and logger, i.e., callback(error,logger).
  - _stop()_ - shutsdown the Couchbase database connection
- - _logEvent(event)_ - logs an event to the Couchbase database asynchronously
-  - emits 'LOG_EVENT_ERR' or 'LOGGED_EVENT'
+ - _logEvent(event)_ - logs an event to the Couchbase database asynchronously.
+    emits 'LOG_EVENT_ERR' or 'LOGGED_EVENT'
  - _logListener()_ - returns a function bound to the CouchbaseLogger instance that can used to configure a LoggingService (runrightfast-logging-service) 
 	
 ## Usage - integrating with runrightfast-logging-service
