@@ -1,6 +1,6 @@
 {
 	"name":"runrightfast-couchbase-logger",
-	"version":"0.0.1",
+	"version":"0.0.2",
 	"description":"RunRightFast Couchbase Logger",
 	"repository":{
 		"type":"git",
@@ -17,8 +17,8 @@
 	"author":"Alfio Zappala",
 	"license":"Apache v2",
 	"dependencies":{
-		"lodash":"1.3.1",
-		"hoek":"1.0.0",
+		"lodash":"2.0.0",
+		"hoek":"1.0.3",
 		"uuid":"1.4.1",
 		"couchbase":"1.0.0",
 		"events":"0.5.0",
@@ -33,6 +33,6 @@
 		"sinon-chai":"~2.4.0",
 		"grunt-mocha-cov":"~0.0.7",
 		"grunt-contrib-clean":"~0.5.0",
-		"runrightfast-logging-service":"git://github.com/runrightfast/runrightfast-logging-service.git#0.0.6"
+		"runrightfast-logging-service":"git://github.com/runrightfast/runrightfast-logging-service.git#0.0.8"
 	}
 }
