@@ -36,7 +36,8 @@ describe('CouchbaseLogger', function() {
 			connectionErrorListener : function(error) {
 				console.error(error);
 				done(error);
-			}
+			},
+			logLevel : 'DEBUG'
 		};
 		couchbaseLogger = require('../lib/couchbase-logger').couchbaseLogger(options);
 		couchbaseLogger.start();
