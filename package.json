@@ -1,6 +1,6 @@
 {
 	"name":"runrightfast-couchbase-logger",
-	"version":"0.0.5",
+	"version":"0.0.6",
 	"description":"RunRightFast Couchbase Logger",
 	"repository":{
 		"type":"git",
