@@ -17,11 +17,11 @@
 	"author":"Alfio Zappala",
 	"license":"Apache v2",
 	"dependencies":{
-		"lodash":"2.0.0",
-		"hoek":"1.0.3",
-		"uuid":"1.4.1",
-		"couchbase":"1.0.0",		
-		"log4js":"0.6.8",
+		"lodash":"2.0.x",
+		"hoek":"1.0.x",
+		"uuid":"1.4.x",
+		"couchbase":"1.0.x",		
+		"log4js":"0.6.x",
 		"runrightfast-commons":"git://github.com/runrightfast/runrightfast-commons.git#0.0.5"
 	},
 	"devDependencies":{
