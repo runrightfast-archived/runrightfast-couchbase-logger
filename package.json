@@ -1,6 +1,6 @@
 {
 	"name":"runrightfast-couchbase-logger",
-	"version":"0.0.8",
+	"version":"0.0.9",
 	"description":"RunRightFast Couchbase Logger",
 	"repository":{
 		"type":"git",
@@ -22,7 +22,7 @@
 		"uuid":"1.4.x",
 		"couchbase":"1.0.x",		
 		"log4js":"0.6.x",
-		"runrightfast-commons":"git://github.com/runrightfast/runrightfast-commons.git#0.0.6"
+		"runrightfast-commons":"git://github.com/runrightfast/runrightfast-commons.git#0.0.7"
 	},
 	"devDependencies":{
 		"grunt":"~0.4.1",
