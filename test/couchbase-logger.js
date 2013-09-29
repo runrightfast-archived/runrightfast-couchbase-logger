@@ -76,6 +76,35 @@ describe('CouchbaseLogger', function() {
 
 	});
 
+	it('#logEvent - 10 times', function(done) {
+		var counter = 0;
+
+		var loggedEventListener = function(result) {
+			counter++;
+			console.log('loggedEventListener : #%d: ', counter, JSON.stringify(result));
+			if (counter == 10) {
+				done();
+			}
+		};
+
+		var logErrorEventListener = function(errorEvent) {
+			console.log('logErrorEventListener: ' + JSON.stringify(errorEvent));
+			done(errorEvent.error);
+		};
+
+		for ( var i = 0; i < 10; i++) {
+			couchbaseLogger.once(COUCHBASE_LOGGER_EVENT.LOGGED_EVENT, loggedEventListener).once(COUCHBASE_LOGGER_EVENT.LOG_EVENT_ERR, logErrorEventListener);
+			var listeners = couchbaseLogger.listeners(COUCHBASE_LOGGER_EVENT.LOGGED_EVENT);
+			var event = {
+				tags : [ 'info' ],
+				data : 'test message from CouchbaseLogger.logEvent',
+				ts : new Date(),
+				uuid : uuid.v4()
+			};
+			couchbaseLogger.logEvent(event);
+		}
+	});
+
 	it('#logListener', function(done) {
 		var loggedEventListener = function(result) {
 			console.log('loggedEventListener: ' + JSON.stringify(result));
