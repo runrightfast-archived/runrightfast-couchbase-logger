@@ -17,7 +17,8 @@
 'use strict';
 var expect = require('chai').expect;
 var uuid = require('uuid');
-var COUCHBASE_LOGGER_EVENT = require('../lib/couchbase-logger').COUCHBASE_LOGGER_EVENT;
+var CouchbaseLogger = require('../lib/couchbase-logger');
+var couchbaseConnectionManager = require('runrightfast-couchbase').couchbaseConnectionManager;
 
 describe('CouchbaseLogger', function() {
 	var couchbaseLogger = null;
@@ -26,11 +27,12 @@ describe('CouchbaseLogger', function() {
 		var options = {
 			couchbase : {
 				"host" : [ "localhost:8091" ],
-				"bucket" : "default"
+				buckets : [ {
+					"bucket" : "default"
+				} ]
 			},
-			connectionListener : function(logger) {
+			connectionListener : function() {
 				console.log('CONNECTED TO COUCHBASE');
-				expect(logger).to.exist;
 				done();
 			},
 			connectionErrorListener : function(error) {
@@ -39,19 +41,32 @@ describe('CouchbaseLogger', function() {
 			},
 			logLevel : 'DEBUG'
 		};
-		couchbaseLogger = require('../lib/couchbase-logger').couchbaseLogger(options);
-		couchbaseLogger.start();
+
+		couchbaseConnectionManager.registerConnection(options);
+		couchbaseLogger = new CouchbaseLogger({
+			couchbaseConn : couchbaseConnectionManager.getBucketConnection('default'),
+			logLevel : 'DEBUG'
+		});
 	});
 
 	after(function(done) {
-		couchbaseLogger.on(COUCHBASE_LOGGER_EVENT.STOPPED, function() {
-			console.log('Couchbase connection has been shutdown.');
-			done();
+		var doneInvoked = 0;
+		var connCount = couchbaseConnectionManager.getConnectionCount();
+		couchbaseConnectionManager.stop(function() {
+			doneInvoked++;
+			console.log("******* doneInvoked = " + doneInvoked);
+			if (connCount === doneInvoked) {
+				done();
+			}
 		});
-		couchbaseLogger.stop();
+		couchbaseConnectionManager.clear();
 	});
 
-	it('#logEvent', function(done) {
+	afterEach(function() {
+		couchbaseLogger.removeAllListeners();
+	});
+
+	it('#logEvent - 1 event', function(done) {
 		var loggedEventListener = function(result) {
 			console.log('loggedEventListener: ' + JSON.stringify(result));
 			done();
@@ -62,9 +77,9 @@ describe('CouchbaseLogger', function() {
 			done(errorEvent.error);
 		};
 
-		couchbaseLogger.once(COUCHBASE_LOGGER_EVENT.LOGGED_EVENT, loggedEventListener).once(COUCHBASE_LOGGER_EVENT.LOG_EVENT_ERR, logErrorEventListener);
-		var listeners = couchbaseLogger.listeners(COUCHBASE_LOGGER_EVENT.LOGGED_EVENT);
-		expect(listeners.length).to.equal(1);
+		couchbaseLogger.once(couchbaseLogger.events.LOGGED_EVENT, loggedEventListener).once(couchbaseLogger.events.LOG_EVENT_ERR, logErrorEventListener);
+		expect(couchbaseLogger.listeners(couchbaseLogger.events.LOGGED_EVENT).length).to.be.at.least(1);
+		expect(couchbaseLogger.listeners(couchbaseLogger.events.LOG_EVENT_ERR).length).to.be.at.least(1);
 
 		var event = {
 			tags : [ 'info' ],
@@ -78,12 +93,18 @@ describe('CouchbaseLogger', function() {
 
 	it('#logEvent - 10 times', function(done) {
 		var counter = 0;
+		var i;
+		var event;
+		var isDone = false;
 
 		var loggedEventListener = function(result) {
 			counter++;
 			console.log('loggedEventListener : #%d: ', counter, JSON.stringify(result));
-			if (counter == 10) {
-				done();
+			if (counter === 10) {
+				if (!isDone) {
+					isDone = true;
+					done();
+				}
 			}
 		};
 
@@ -92,10 +113,11 @@ describe('CouchbaseLogger', function() {
 			done(errorEvent.error);
 		};
 
-		for ( var i = 0; i < 10; i++) {
-			couchbaseLogger.once(COUCHBASE_LOGGER_EVENT.LOGGED_EVENT, loggedEventListener).once(COUCHBASE_LOGGER_EVENT.LOG_EVENT_ERR, logErrorEventListener);
-			var listeners = couchbaseLogger.listeners(COUCHBASE_LOGGER_EVENT.LOGGED_EVENT);
-			var event = {
+		for (i = 0; i < 10; i++) {
+			couchbaseLogger.once(couchbaseLogger.events.LOGGED_EVENT, loggedEventListener).once(couchbaseLogger.events.LOG_EVENT_ERR, logErrorEventListener);
+			expect(couchbaseLogger.listeners(couchbaseLogger.events.LOGGED_EVENT).length).to.be.at.least(1);
+			expect(couchbaseLogger.listeners(couchbaseLogger.events.LOG_EVENT_ERR).length).to.be.at.least(1);
+			event = {
 				tags : [ 'info' ],
 				data : 'test message from CouchbaseLogger.logEvent',
 				ts : new Date(),
@@ -116,8 +138,8 @@ describe('CouchbaseLogger', function() {
 			done(errorEvent.error);
 		};
 
-		couchbaseLogger.once(COUCHBASE_LOGGER_EVENT.LOGGED_EVENT, loggedEventListener).once(COUCHBASE_LOGGER_EVENT.LOG_EVENT_ERR, logErrorEventListener);
-		var listeners = couchbaseLogger.listeners(COUCHBASE_LOGGER_EVENT.LOGGED_EVENT);
+		couchbaseLogger.once(couchbaseLogger.events.LOGGED_EVENT, loggedEventListener).once(couchbaseLogger.events.LOG_EVENT_ERR, logErrorEventListener);
+		var listeners = couchbaseLogger.listeners(couchbaseLogger.events.LOGGED_EVENT);
 		expect(listeners.length).to.equal(1);
 
 		var event = {
@@ -130,49 +152,6 @@ describe('CouchbaseLogger', function() {
 		logListener(event);
 	});
 
-	it("#start - can take an optional callback that will be called when the connection is successfully made", function(done) {
-		var options = {
-			couchbase : {
-				"host" : [ "localhost:8091" ],
-				"bucket" : "default"
-			},
-			connectionErrorListener : function(error) {
-				console.error(error);
-				done(error);
-			}
-		};
-
-		var couchbaseLogger = require('../lib/couchbase-logger').couchbaseLogger(options);
-		couchbaseLogger.start(function(logger) {
-			expect(logger).to.be.defined;
-			couchbaseLogger.stop();
-			done();
-		});
-	});
-
-	it("#start - can take an optional callback that will be called when the connection is made with an Error if the connection fails", function(done) {
-		var options = {
-			// invalid options with bucket that does not exist
-			couchbase : {
-				"host" : [ "localhost:8091" ],
-				"bucket" : uuid.v4()
-			},
-			connectionErrorListener : function(error) {
-				console.error(error);
-			}
-		};
-
-		var couchbaseLogger = require('../lib/couchbase-logger').couchbaseLogger(options);
-		couchbaseLogger.start(function(error) {
-			if (error instanceof Error) {
-				done();
-			} else {
-				done(new Error('expected an Error but got : ' + error));
-			}
-
-		});
-	});
-
 	it("#logEvent - emits 'LOG_EVENT_ERR' when logging the event fails", function(done) {
 		var event = {
 			tags : [ 'info' ],
@@ -180,27 +159,14 @@ describe('CouchbaseLogger', function() {
 			ts : new Date(),
 			uuid : uuid.v4()
 		};
-		var options = {
-			// invalid options with bucket that does not exist
-			couchbase : {
-				"host" : [ "localhost:8091" ],
-				"bucket" : uuid.v4()
-			},
-			connectionErrorListener : function(error, logger) {
-				console.error(error);
-				logger.logEvent(event);
-			}
-		};
 
-		var couchbaseLogger = require('../lib/couchbase-logger').couchbaseLogger(options);
-		couchbaseLogger.on(COUCHBASE_LOGGER_EVENT.LOG_EVENT_ERR, function(error, event2, logger) {
+		couchbaseLogger.once(couchbaseLogger.events.LOG_EVENT_ERR, function(error, event2, logger) {
 			try {
 				expect(error).to.exist;
 				expect(event2).to.exist;
 				expect(event2.uuid).to.equal(event.uuid);
 				expect(logger).to.exist;
 				console.log('typeof logger : ' + (typeof logger));
-				logger.stop();
 
 				if (error instanceof Error) {
 					done();
@@ -212,7 +178,9 @@ describe('CouchbaseLogger', function() {
 			}
 
 		});
-		couchbaseLogger.start();
+
+		couchbaseLogger.logEvent(event);
+		couchbaseLogger.logEvent(event);
 	});
 
 	it('can integrate with runrightfast-logging-service', function(done) {
@@ -221,7 +189,7 @@ describe('CouchbaseLogger', function() {
 		};
 		var loggingService = require('runrightfast-logging-service')(loggingServiceOptions);
 
-		couchbaseLogger.on(COUCHBASE_LOGGER_EVENT.LOGGED_EVENT, function(result) {
+		couchbaseLogger.on(couchbaseLogger.events.LOGGED_EVENT, function(result) {
 			console.log('EVENT WAS LOGGED : ' + JSON.stringify(result));
 			done();
 		});
