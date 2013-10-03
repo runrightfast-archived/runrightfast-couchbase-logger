@@ -203,4 +203,39 @@ describe('CouchbaseLogger', function() {
 		loggingService.log(event);
 	});
 
+	it('can can be converted to a runrightfast-logging-service instance', function(done) {
+		var loggingService = couchbaseLogger.toLoggingService();
+
+		couchbaseLogger.on(couchbaseLogger.events.LOGGED_EVENT, function(result) {
+			console.log('EVENT WAS LOGGED : ' + JSON.stringify(result));
+			done();
+		});
+
+		var event = {
+			tags : [ 'info' ],
+			data : 'test message from CouchbaseLogger.logEvent',
+			ts : new Date(),
+			uuid : uuid.v4()
+		};
+		loggingService.log({
+			data : 'bad event'
+		});
+		loggingService.log(event);
+	});
+
+	it('can can be converted to a runrightfast-logging-service instance', function() {
+		var loggingService = couchbaseLogger.toLoggingService();
+
+		var event = {
+			tags : [ 'info' ],
+			data : 'test message from CouchbaseLogger.logEvent',
+			ts : new Date(),
+			uuid : uuid.v4()
+		};
+		loggingService.log({
+			data : 'bad event'
+		});
+		loggingService.log(event);
+	});
+
 });
