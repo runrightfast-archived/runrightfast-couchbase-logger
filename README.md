@@ -43,7 +43,7 @@ The purpose of this module is to provide a logListener implementation that can b
  - 'STARTED'
  - 'STOPPED'
  
-		 // listen for logging errors
+		 //listen for logging errors
 		 couchbaseLogger.on(COUCHBASE_LOGGER_EVENT.LOG_EVENT_ERR, function(error, event, logger) { ... }
 	
 - couchbaseLogger contains the following methods
