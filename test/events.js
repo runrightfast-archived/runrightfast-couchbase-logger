@@ -21,7 +21,6 @@ describe('EventEmiiter', function() {
 		}
 
 		expect(counter).to.equal(10);
-
 	});
 
 	it('emits events asynchronously', function(done) {
@@ -45,6 +44,5 @@ describe('EventEmiiter', function() {
 		}
 
 		expect(counter).to.equal(0);
-
 	});
 });
